@@ -10,6 +10,8 @@ import lombok.Setter;
 public class RequestVO {
 	private String startDt;
 	
+	private String libCode;
+	
 	public RequestVO() {
 	}
 	

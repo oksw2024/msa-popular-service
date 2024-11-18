@@ -29,6 +29,14 @@ public class RecommendService {
 		return fetchSearchResults(uri);
 	}
 	
+	public ResultVO newSearchBooks() {
+		URI uri = UriBuilderUtil.buildSearchUri2();
+		
+		System.out.println("request URI : " + uri);
+		
+		return fetchSearchResults(uri);
+	}
+	
 	private ResultVO fetchSearchResults(URI uri) {
         try {
             String response = restTemplate.getForObject(uri, String.class);

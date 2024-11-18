@@ -33,4 +33,8 @@ public class RecommendController {
 		return recommendService.resultBooks(startDt, page, size);
 	}
 	
+	@GetMapping("/new")
+	public ResultVO newBooks() {
+		return recommendService.newSearchBooks();
+	}
 }
