@@ -3,6 +3,10 @@ package osj.javat.service;
 import java.net.URI;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.circuitbreaker.resilience4j.Resilience4JCircuitBreakerFactory;
+import org.springframework.cloud.circuitbreaker.resilience4j.Resilience4JConfigBuilder;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -21,6 +25,9 @@ public class RecommendService {
 	@Autowired
 	private ObjectMapper objectMapper;
 	
+	@Autowired
+	private CircuitBreakerFactory circuitBreakerFactory;
+	
 	public ResultVO resultBooks(String startDt, int page, int size) {
 		URI uri = UriBuilderUtil.buildSearchUri(startDt, page, size);
 		
@@ -38,15 +45,25 @@ public class RecommendService {
 	}
 	
 	private ResultVO fetchSearchResults(URI uri) {
-        try {
-            String response = restTemplate.getForObject(uri, String.class);
-            System.out.println("API Response: " + response);
-            ResultVO result = objectMapper.readValue(response, ResultVO.class);
-            System.out.println("result : " + result);
-            return result;
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return null;
-        }
+		CircuitBreaker circuitBreaker = circuitBreakerFactory.create("recommendApiCircuitBreaker");
+		
+		return circuitBreaker.run(() -> {
+	        try {
+	            String response = restTemplate.getForObject(uri, String.class);
+	            System.out.println("API Response: " + response);
+	            ResultVO result = objectMapper.readValue(response, ResultVO.class);
+	            System.out.println("result : " + result);
+	            return result;
+	        } catch (JsonProcessingException e) {
+	            e.printStackTrace();
+	            return null;
+	        }
+		}, throwable -> fallbackMethod(throwable));
     }
+	
+	private ResultVO fallbackMethod(Throwable throwable) {
+		ResultVO fallbackResult = new ResultVO();
+		fallbackResult.setResponse(null);
+		return fallbackResult;
+	}
 }

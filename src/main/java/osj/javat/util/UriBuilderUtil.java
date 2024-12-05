@@ -24,6 +24,7 @@ public class UriBuilderUtil {
     	UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(API_URL2)
     			.queryParam("authKey", AUTH_KEY)
     			.queryParam("libCode", "111035")
+    			.queryParam("searchDt", "2024-11")
     			.queryParam("format", "json");
     	
     	return uriBuilder.encode().build().toUri();
